@@ -1,0 +1,62 @@
+%TC:ignore
+\immediate\write18{texcount -inc -sum -utf8 main.tex > wordcount.txt}
+%TC:endignore
+
+
+\documentclass[12pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[round]{natbib}
+\usepackage{newtxtext,newtxmath} % Better than \usepackage{times}
+\usepackage{hyperref}
+\usepackage{setspace}
+\doublespacing
+\usepackage{booktabs}
+\usepackage{threeparttable}
+\usepackage[table]{xcolor}
+\usepackage{graphicx}
+\usepackage{appendix}
+\usepackage{siunitx}
+\usepackage{tabularray}
+\usepackage{indentfirst}
+
+\sisetup{detect-all} % ensures consistency with font settings
+\usepackage[style=apa, backend=biber]{biblatex}
+\addbibresource{refs.bib}
+\bibliography{refs}
+
+\title{How do the Leaders Speak? Prediction of Regime Type Using Linguistic Features}
+\author{Jihyeon Bae}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+
+\end{abstract}
+
+\section{Introduction}
+
+
+\section{Constitutional Control and Institutional Design}
+
+\subsection{Regime Type as an explanatory variable}
+
+\subsection{Domestic Political Cost of Majority Rule}
+
+\section{Data and Methods}
+The following sections provide empirical strategies to test the theoretical expectation outlined above. I use panel data of 73 IGOs from 1960 to 2019 traced by the ``Measuring International Authority (MIA)'' \parencite{hooghe2017}. This time scope well captures the landscape of international governance at the beginning of the second democratization wave and in a less ideology-driven setting \parencite{strand2012}. To measure the level of democracy for members, I use the polyarchy score, ranging from 0 to 1 from the Varieties of Democracy project \parencite{coppedge2021}. I merge the MIA dataset with the Correlates of War dataset \parencite{pevehouse2020}, which focuses on formal organizations to get general information about the organization, including whether it’s designed to tackle general or task-specific goals. This excludes ad hoc groups that are designed to serve a short-term goal like the Cairns group and informal groups lacking independent secretariat like G8.
+
+
+
+\section{Conclusion}
+
+
+\begin{appendices}
+
+
+\input{amendment_aigo/pooling_table_clean.tex}
+\end{appendices}
+
+\end{document}
