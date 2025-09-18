@@ -3,9 +3,9 @@
 %TC:endignore
 
 
+
 \documentclass[12pt]{article}
 \usepackage[margin=1in]{geometry}
-\usepackage[round]{natbib}
 \usepackage{newtxtext,newtxmath} % Better than \usepackage{times}
 \usepackage{hyperref}
 \usepackage{setspace}
@@ -21,11 +21,12 @@
 
 \sisetup{detect-all} % ensures consistency with font settings
 \usepackage[style=apa, backend=biber]{biblatex}
-\addbibresource{refs.bib}
-\bibliography{refs}
+\addbibresource{LIWC.bib}
+
+
 
 \title{How do the Leaders Speak? Prediction of Regime Type Using Linguistic Features}
-\author{Jihyeon Bae}
+\author{Jihyeon Bae, Valentina Staneva}
 \date{}
 
 \begin{document}
@@ -37,18 +38,45 @@
 \end{abstract}
 
 \section{Introduction}
+In this paper, we use linguistic features of state representatives' speech transcripts from the United Nations General Debate Corpus (UNGDC) to predict the regime type. The goal is twofold. First, we aim at running a hard test for a hypothesis that countries identified with distinct regime types show different linguistic styles. If I can predict the speaker's regime type based on linguistic features, it is a strong indication of the difference in linguistic features across regime types. Second, this project analyzes key linguistic features that act as a strong signal of the state's regime type. I further interpret substantive implication of strong coefficients and check how consistent their degrees of significance are across the models.
 
+This script uses the scores of LIWC features and merges with country-year level meta data. Our dataset has a battery of country-year level variables that might potentially confound the statistical modeling. At the country-year level, we run a series of statistical models that probe the relationship between linguistic features and sentiment scores of that speech. To preview, LIWC features alone have a strong predictive power on regime types, even without the help of meta data. 
 
-\section{Constitutional Control and Institutional Design}
+I test whether there is a correlation between a country's invocation of international legal norms and the regime type. Among many, I generate three key legal principles that are prominent throughout the history of international politics. These are principle of sovereignty, principle of non-intervention, and the principle of human rights. Binary variables capture whether each principle was invoked, and count variables measure the number of time it was mentioned within one speech.  
 
-\subsection{Regime Type as an explanatory variable}
+\section{Autocratic and Democratic Language Features}
 
-\subsection{Domestic Political Cost of Majority Rule}
+\subsection{Linguistic Style as a Predictor}
+
 
 \section{Data and Methods}
-The following sections provide empirical strategies to test the theoretical expectation outlined above. I use panel data of 73 IGOs from 1960 to 2019 traced by the ``Measuring International Authority (MIA)'' \parencite{hooghe2017}. This time scope well captures the landscape of international governance at the beginning of the second democratization wave and in a less ideology-driven setting \parencite{strand2012}. To measure the level of democracy for members, I use the polyarchy score, ranging from 0 to 1 from the Varieties of Democracy project \parencite{coppedge2021}. I merge the MIA dataset with the Correlates of War dataset \parencite{pevehouse2020}, which focuses on formal organizations to get general information about the organization, including whether it’s designed to tackle general or task-specific goals. This excludes ad hoc groups that are designed to serve a short-term goal like the Cairns group and informal groups lacking independent secretariat like G8.
 
+I included linguistic style features as well as word counts(WC), the raw number of words within each speech Word counts can change the distribution of linguistic features, as the pool from which words come from can affect the count of dictionary words. Another alternative measures is Words per Sentence (WPS), average number of words within a sentence for each document. Big Words (BW) also captures the percentage of words that are 7 letters or longer. Dictionary (Dic) variable refers to the percentage of words that were captured by LIWC.
 
+There are four summary variables; Analytical, Clout, Authenticity, and Emotional Tone. Each are constructed based on LIWC features as well as other psychological literature \parencite{boyd_did_2015, cohn_linguistic_2004, kacewicz_pronoun_2014, newman_lying_2003}. These summary variables range from 1 to 99, after standardization. Analytical thinking score increases when the speech includes formal, logical, and hierarchical patterns. Clout is intended to capture the degree in which the speaker displays one's confidence, status, and leadership. Authenticity score increases when the speaker does not intend to regulate oneself and displays a spontaneous style. Emotional score is an overall tone of the speech, intended to show how positive or negative a speaker is.
+
+Note that one word can be captured by different bags of dictionaries. For example, the word ``we`` will be counted toward a ``affiliation``, ``social reference``, and a pronoun dictionary.
+
+LIWC-22 has additional features like ``determiners,`` that includes ``this``, ``first``, ``three.`` It also has a feature ``Cognition,`` that reflects different ways in which people process their thoughts. It is shown by dichotomous logical words, memory words, and words that reveal certainty. It also includes ``political`` as one of the three domains within the overarching ``Culture`` dimension. Examples for ``political`` construct are congress, parliament, president, democratic, law, and court.
+
+\subsection{Features}
+The variable ``Dic(Dictionary Words)`` show the percentage of words in the text that are captured by one or more LIWC feature dictionaries.``WC(Word Count)`` refers to the total word counts per document, and ``WPS(Word Per Sentences)`` shows the average number of words for sentences per document. ``WPS`` is negatively correlated with ``Period,`` in that a speech with long sentences need less periods to end each sentence.
+
+\subsection{Random Forest Model}
+To compare the performance of logistic regression, we use non-parametric random forest models to see how well a battery of LIWC features can predict the regime type.
+Random Forest approach bootstraps samples multiple times with replacement. For each iteration, a decision tree is built and the algorithm trains the model through all the trees. The model uses the majority vote from all trees to reach a conclusion on the given classification task. It is important to explicitly set the output variable, democracy, as a factor variable, so that R recognizes the task as a classification, not a regression model.
+
+The Mean Decrease Accuracy (MDA) plot expresses how much accuracy the model loses by permuting each variable. The more the accuracy suffers, the more important the variable is for the successful classification. According to the \textcite{liaw_classification_2002} R package, the measure is computed from permuting out of bag data. Each tree generates prediction error for out-of-bag data and another prediction error after permuting one variable. Each tree records difference in two errors with and without permutation across all the features, and eventually generates an average. MDA is then divided by the standard deviation value of decrease in accuracy of trees. 
+
+The mean decrease in Gini coefficient is a measure of how each variable contributes to the homogeneity of the nodes and leaves in the resulting random forest. The higher the value of mean decrease accuracy or mean decrease Gini score, the higher the importance of the variable in the model. Since we're interested in the substantive meaning of feature, we focus on the accuracy score instead of Gini coefficient.
+
+\section{Statistical Models}
+To supplement machine-learning approach of regression, I present a set of conventional statistical tests accounting for error correlation.  Using random effects model when the unit-specific intercepts have correlation with the input variables, and eventually lead to omitted variable bias. I suspect this would not be the case, as the linguistic features (inputs) often have high correlation with time invariant characteristics of countries. However, there does not exist a consistent theoretical conjecture on the correlation between these two. To accommodate such uncertainty, we also supplement the result by using fixed effects model.
+
+\section{Empirical Results and Model Performance}
+As a baseline, the first trial keeps all of the LIWC features to the random forest model. This hit the accuracy rate of 0.7496. To make sure there is enough observations for both democracy and non-democracy, we use stratified sampling based on the main output of interest, \textit{democracy}. This means that the model performance can change when the distribution of the output is different from the current dataset. Our dataset has a well balanced distribution, with 4883 non-democracies and 4763 democracies. We randomly keep 30\% of the data as a testing dataset. Functionally, we use R packages \textcite{paluszynska_randomforestexplainer_2020} and \textcite{liaw_classification_2002} to generate various metrics of Importance. 
+
+Based on several importance metrics, ``WPS`` showed up as important features. Given theoretically weak ties between WPS and regime type, we investigate sources of biases in the model. The specific question here is \textit{to what extent is variable ``WPS`` robust against different modeling strategies and importance metrics selections}?
 
 \section{Conclusion}
 
@@ -56,7 +84,8 @@ The following sections provide empirical strategies to test the theoretical expe
 \begin{appendices}
 
 
-\input{amendment_aigo/pooling_table_clean.tex}
 \end{appendices}
+
+\printbibliography
 
 \end{document}
