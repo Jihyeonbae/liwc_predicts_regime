@@ -34,15 +34,22 @@
 \maketitle
 
 \begin{abstract}
-
+Studies of international rhetoric typically focus on what leaders say: the concepts, frames, and keywords that appear in their speeches. This note argues that how leaders speak is equally important for understanding regime differences in global fora. Using a corpus of United Nations General Debate speeches, we apply random forest models to a rich set of linguistic indicators from the LIWC dictionary. The results show that stylistic and structural features, such as average sentence length, grammatical composition, and punctuation use, emerge as consistently important predictors of whether a speaker represents a democracy or an autocracy. These variables often rival or surpass the predictive power of more substantive content features. Importantly, random forest accuracy does not substantially exceed a logistic regression baseline, suggesting that the main contribution of machine learning here is not greater prediction but the identification of stylistic signals embedded in political speech. The analysis highlights the need to treat rhetorical style as more than noise. It provides a systematic dimension through which regime type is communicated and distinguished. By foregrounding how leaders speak alongside what they say, this note calls for greater attention to stylistic dimensions of international discourse in both empirical research and theoretical debates.
 \end{abstract}
 
+\keywords{regime type;  political rhetoric;   machine learning; text analysis}
+
 \section{Introduction}
-In this paper, we use linguistic features of state representatives' speech transcripts from the United Nations General Debate Corpus (UNGDC) to predict the regime type. The goal is twofold. First, we aim at running a hard test for a hypothesis that countries identified with distinct regime types show different linguistic styles. If I can predict the speaker's regime type based on linguistic features, it is a strong indication of the difference in linguistic features across regime types. Second, this project analyzes key linguistic features that act as a strong signal of the state's regime type. I further interpret substantive implication of strong coefficients and check how consistent their degrees of significance are across the models.
+
+Studies of international rhetoric typically focus on what leaders say: the topics, principles, and keywords invoked in their speeches. This paper highlights that how leaders speak also provides systematic information about regime type. We use linguistic features of state representatives’ speeches from the United Nations General Debate Corpus (UNGDC) to predict whether a country is democratic or authoritarian. 
+
+The contribution is twofold. First, we provide a hard test of the claim that regime types differ in their rhetorical style. If linguistic features alone can predict the regime type of a speaker, this offers strong evidence that stylistic choices—such as sentence length, grammatical composition, or the balance of function words—systematically vary across political systems. Second, we identify the specific features that act as the strongest signals of regime type and assess their robustness across modeling strategies. 
+
+To do so, we apply the Linguistic Inquiry and Word Count (LIWC) dictionary to all UN General Debate speeches and merge the results with country–year regime classifications. We then compare random forest models to a logistic regression baseline. The findings previewed here suggest that while predictive performance is modest, certain stylistic features consistently emerge as important, underscoring the value of analyzing rhetorical style alongside substantive content in the study of international discourse.
 
 This script uses the scores of LIWC features and merges with country-year level meta data. Our dataset has a battery of country-year level variables that might potentially confound the statistical modeling. At the country-year level, we run a series of statistical models that probe the relationship between linguistic features and sentiment scores of that speech. To preview, LIWC features alone have a strong predictive power on regime types, even without the help of meta data. 
 
-I test whether there is a correlation between a country's invocation of international legal norms and the regime type. Among many, I generate three key legal principles that are prominent throughout the history of international politics. These are principle of sovereignty, principle of non-intervention, and the principle of human rights. Binary variables capture whether each principle was invoked, and count variables measure the number of time it was mentioned within one speech.  
+We test whether there is a correlation between a country's invocation of international legal norms and the regime type. Among many, we generate three key legal principles that are prominent throughout the history of international politics. These are principle of sovereignty, principle of non-intervention, and the principle of human rights. Binary variables capture whether each principle was invoked, and count variables measure the number of time it was mentioned within one speech.  
 
 \section{Autocratic and Democratic Language Features}
 
@@ -70,6 +77,7 @@ The Mean Decrease Accuracy (MDA) plot expresses how much accuracy the model lose
 
 The mean decrease in Gini coefficient is a measure of how each variable contributes to the homogeneity of the nodes and leaves in the resulting random forest. The higher the value of mean decrease accuracy or mean decrease Gini score, the higher the importance of the variable in the model. Since we're interested in the substantive meaning of feature, we focus on the accuracy score instead of Gini coefficient.
 
+\input{}
 \section{Statistical Models}
 To supplement machine-learning approach of regression, I present a set of conventional statistical tests accounting for error correlation.  Using random effects model when the unit-specific intercepts have correlation with the input variables, and eventually lead to omitted variable bias. I suspect this would not be the case, as the linguistic features (inputs) often have high correlation with time invariant characteristics of countries. However, there does not exist a consistent theoretical conjecture on the correlation between these two. To accommodate such uncertainty, we also supplement the result by using fixed effects model.
 
