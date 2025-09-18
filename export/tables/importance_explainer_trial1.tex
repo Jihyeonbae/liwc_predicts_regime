@@ -1,0 +1,35 @@
+\begin{table}[!h]
+\centering
+\caption{RandomForestExplainer importance with p-values (Top 20, Trial 1)}
+\centering
+\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{
+\begin{tabular}[t]{lrrrrr}
+\toprule
+Feature & Accuracy ↓ & Gini ↓ & Nodes & p & p (BH)\\
+\midrule
+democracy & 0.270 & 1922.958 & 500 & 1.00e+00 & 1.000000\\
+verb & 0.023 & 19.926 & 1930 & 0.00e+00 & 0.000000\\
+Period & 0.010 & 30.743 & 2633 & 0.00e+00 & 0.000000\\
+auxverb & 0.010 & 12.931 & 1466 & 7.74e-02 & 0.171000\\
+WPS & 0.007 & 19.431 & 2146 & 0.00e+00 & 0.000000\\
+\addlinespace
+focuspresent & 0.006 & 11.070 & 1557 & 7.22e-05 & 0.000204\\
+affiliation & 0.004 & 15.494 & 1387 & 7.52e-01 & 1.000000\\
+ethnicity & 0.004 & 16.828 & 1380 & 8.08e-01 & 1.000000\\
+allure & 0.004 & 13.054 & 2033 & 0.00e+00 & 0.000000\\
+cogproc & 0.004 & 10.259 & 1237 & 1.00e+00 & 1.000000\\
+\addlinespace
+Dic & 0.003 & 12.228 & 1737 & 0.00e+00 & 0.000000\\
+focusfuture & 0.003 & 15.272 & 1941 & 0.00e+00 & 0.000000\\
+differ & 0.003 & 13.123 & 1635 & 0.00e+00 & 0.000000\\
+we & 0.003 & 10.789 & 1349 & 9.56e-01 & 1.000000\\
+function\_liwc & 0.002 & 7.496 & 1015 & 1.00e+00 & 1.000000\\
+\addlinespace
+Linguistic & 0.002 & 8.545 & 1139 & 1.00e+00 & 1.000000\\
+WC & 0.002 & 13.730 & 1978 & 0.00e+00 & 0.000000\\
+adverb & 0.002 & 12.159 & 1493 & 1.65e-02 & 0.039200\\
+ppron & 0.002 & 10.898 & 1499 & 1.10e-02 & 0.026700\\
+conj & 0.002 & 18.928 & 2637 & 0.00e+00 & 0.000000\\
+\bottomrule
+\end{tabular}}
+\end{table}

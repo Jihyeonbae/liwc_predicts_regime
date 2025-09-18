@@ -43,7 +43,7 @@ data<-data %>%
   dplyr::select(-"...1")
 
 data$year<-as.numeric(data$year)
-data<-data[, c(1:122,149) ]
+data<-data[, c(1:122,230, 180) ]
 
 ```
 
@@ -77,6 +77,11 @@ testN <- testN[, !(names(testN) %in% c("ccode_iso", "year", "session", "dd_regim
 # Remove rows with missing values
 trainN <- na.omit(trainN)
 
+trainN<-trainN %>%
+  dplyr::rename(function_liwc = `function`) %>%  # avoid reserved word otherwise it will throw an error
+  dplyr::select(-text)
+
+
 # Fit random forest model
 bag.democracy1 <- randomForest(dd_democracy ~ ., 
                                data = trainN, 
@@ -84,14 +89,30 @@ bag.democracy1 <- randomForest(dd_democracy ~ .,
                                mtry = ncol(trainN) - 1,
                                importance = TRUE)
 
+# Trial 1 
 # setting type to 1 selects Mean Accuracy Decrease, not Gini Coefficient. 
-importance(bag.democracy1,  type=1, scale = TRUE) %>%
-  as.data.frame() %>%
-  arrange(desc(abs(MeanDecreaseAccuracy))) %>%head(20) %>%
-  kbl() %>%  kable_paper("hover", full_width = FALSE) %>%
-  scroll_box(width = "100%", height = "400px") 
+imp_df1 <- importance(bag.democracy1, type = 1, scale = TRUE) |>
+  as.data.frame() |>
+  rownames_to_column("feature") |>
+  dplyr::arrange(desc(abs(MeanDecreaseAccuracy)))
 
-varImpPlot(bag.democracy1, type=1, scale = TRUE, sort=T, n.var= 25, main= "Democracy vs. Non-democracy", pch=16)
+# CSV for  re-use
+write_csv(imp_df1, "export/tables/importance_trial1.csv")
+
+# LaTeX table for Overleaf (top 20)
+imp_tab1 <- imp_df1 |>
+  head(20) |>
+  kbl(format = "latex", booktabs = TRUE,
+      caption = "Top 20 features by Mean Decrease Accuracy (Trial 1)") |>
+  kable_styling(latex_options = c("hold_position","scale_down"))
+
+save_kable(imp_tab1, "export/tables/importance_trial1.tex")
+
+# and then the plot
+
+png("export/figs/varImp_trial1.png", width = 2000, height = 1400, res = 300)
+varImpPlot(bag.democracy1, type = 1, scale = TRUE, sort = TRUE,
+           n.var = 25, main = "Democracy vs. Non-democracy", pch = 16)
 
 # P-value on whether the observed number of successes > the theoretical number of successes if random
 importance_frame <- measure_importance(bag.democracy1)
@@ -101,7 +122,33 @@ importance_frame%>%
   kbl() %>%  kable_paper("hover", full_width = FALSE) %>%
   scroll_box(width = "100%", height = "400px") 
 
+imp_explainer_top20 <- importance_frame %>%
+  as.data.frame() %>%
+  # keep useful columns; add BH-adjusted p-values
+  dplyr::transmute(
+    variable,
+    accuracy_decrease,
+    gini_decrease,
+    no_of_nodes,
+    p_value = p_value,                          # from randomForestExplainer
+    p_adj_BH = p.adjust(p_value, method = "BH") # multiple-testing control
+  ) %>%
+  dplyr::arrange(desc(abs(accuracy_decrease))) %>%
+  slice_head(n = 20)
 
+tab_expl <- imp_explainer_top20 %>%
+  mutate(
+    accuracy_decrease = round(accuracy_decrease, 3),
+    gini_decrease     = round(gini_decrease, 3),
+    p_value           = signif(p_value, 3),
+    p_adj_BH          = signif(p_adj_BH, 3)
+  ) %>%
+  kbl(format = "latex", booktabs = TRUE,
+      caption = "RandomForestExplainer importance with p-values (Top 20, Trial 1)",
+      col.names = c("Feature","Accuracy ↓","Gini ↓","Nodes","p","p (BH)")) %>%
+  kable_styling(latex_options = c("hold_position","scale_down"))
+
+save_kable(tab_expl, "export/tables/importance_explainer_trial1.tex")
 
 # scale = TRUE divides the permutation based measures into their "standard errors"
 #The function automatically scales the importance scores to be between 0 and 100. 
@@ -111,6 +158,11 @@ importance_frame%>%
 ### Trial 1 Prediction Performance
 
 ```{r}
+testN <- testN %>%
+  dplyr::rename(function_liwc = `function`) %>%
+  dplyr::select(-text)
+
+
 RT.pred1 <- predict(bag.democracy1, newdata=testN, type="class")
 RT.evlau1 <- caret::confusionMatrix(as.factor(testN$dd_democracy), 
                                    RT.pred1, 
@@ -118,13 +170,36 @@ RT.evlau1 <- caret::confusionMatrix(as.factor(testN$dd_democracy),
                                    dnn = c("Reference","Prediction"))
 RT.evlau1
 
-# ROC curve and AUC
+cm_df <- as.data.frame(RT.evlau1$table)
+
+dir.create("export/tables", recursive = TRUE, showWarnings = FALSE)
+readr::write_csv(cm_df, "export/tables/confusion_trial1.csv")
+
+cm_tab <- cm_df %>%
+  kbl(format = "latex", booktabs = TRUE,
+      caption = "Confusion matrix for Random Forest (Trial 1)") %>%
+  kable_styling(latex_options = c("hold_position","scale_down"))
+
+save_kable(cm_tab, "export/tables/confusion_trial1.tex")
+
 RT.pred.roc1 <- predict(bag.democracy1, newdata=testN, type="prob")
+auc_val <- pROC::auc(roc_RT.tree1) 
 roc_RT.tree1 <- roc(as.factor(testN$dd_democracy), RT.pred.roc1[,"1"])
 par(mfrow=c(1,1))
-plot(roc_RT.tree1, main="ROC curve for Random Forest", 
-     col="blue", lwd=2, legacy.axes=FALSE)
-title(main = paste('Area under the curve: ',auc(roc_RT.tree1)))
+
+png("export/figs/roc_randomforest_trial1.png", width=2000, height=1400, res=300)
+par(mfrow=c(1,1))
+plot(roc_RT.tree1,
+     main = "ROC curve for Random Forest",
+     col = "blue", lwd = 2, legacy.axes = FALSE,
+     print.auc = TRUE,                 # add AUC text
+     print.auc.x = 0.6,                # x position (Specificity axis, 0=right, 1=left)
+     print.auc.y = 0.98,               # y position (Sensitivity axis; 1 is top)
+     print.auc.cex = 1.2,              # text size
+     print.auc.col = "black")
+dev.off()
+
+
 ```
 
 ### Post Analysis on Trial 1: Understanding WPS
@@ -251,6 +326,7 @@ bag.democracy.h3 <- randomForest(dd_democracy ~ .,
                                importance = TRUE)
 bag.democracy.h3
 ```
+
 
 ## Trial 2: PCA on LIWC features
 
